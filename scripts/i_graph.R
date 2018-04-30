@@ -28,10 +28,10 @@ plot(g_nonproft,vertex.label = NA)
 org_attributes <- data_frame(org_name = V(g_nonproft)$name)
 # only need the org attributes, not the edge (name) attributes
 zulu <- bravo %>% 
-  select(org_name, 
-         city,
-         zip = zip_code) %>% 
-  distinct(.)
+    select(org_name, 
+           city,
+           zip = zip_code) %>% 
+    distinct(.)
 
 Nodes <- left_join(org_attributes,zulu)
 

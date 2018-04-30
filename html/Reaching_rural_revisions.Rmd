@@ -1,0 +1,16 @@
+---
+title: "Reacing_rural_revisions"
+author: "Elliot Meador"
+date: "30 April 2018"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load('code_percent.RData')
+source('bar_plot.R')
+bar_plot
+```
+

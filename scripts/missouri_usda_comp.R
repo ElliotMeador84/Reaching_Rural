@@ -148,13 +148,17 @@ code_percent_MO %>%
 code_percent_wide <- code_percent_long %>%
     mutate(Percent_diff = abs(Percent - Percent_MO)) %>% 
     arrange(Percent_diff) %>% 
-    mutate(rank = 1:nrow(.))
+    mutate(rank = 1:nrow(.)) %>% 
+    ungroup() %>% 
+    select(Description,Percent_diff,rank) %>% 
+    mutate(Percent_diff = scales::percent(Percent_diff))
     
     
 save(code_percent_wide,file = 'html/code_percent_wide.RData')
 
 
-
+code_percent_wide  
+    
 
 
 
@@ -215,72 +219,35 @@ Proportion_Tables <- codes %>%
     arrange(RUCC_2013)
 
 Proportion_Tables 
-# ====
-codes %>% 
-    filter(State != 'MO') %>% 
-    count(RUCC_2013) %>% 
-    mutate(Average_proportion = scales::percent(n/sum(n))) %>% 
-    select(RUCC_2013,Average_proportion) %>% 
-    distinct() %>% 
-    bind_cols(.,MO_proportions) %>% 
-    mutate(MO_proportion = scales::percent(MO_proportion))
 
 
 
-# Standard Deviation ------------------------------------------------------
-
-
-
-
+# MO vs all other states --------------------------------------------------
 
 codes %>% 
     group_by(State,Description) %>% 
     count() %>% 
-    ungroup()    %>% 
-    group_by(Description) %>% 
-    mutate(freq = (n/sum(n))*1000,
-           st.deviation  = sd(freq),
-           sd_low = (st.deviation-freq)/1000,
-           sd_high = (st.deviation+freq)/1000,
-           Percent = freq/1000) %>% 
-    select(Description,sd_low,sd_high) %>% 
-    group_by(Description) %>% 
-    summarise(sd_low = mean(sd_low),
-              sd_high = mean(sd_high))
+    ungroup() %>% 
+    mutate(freq = n/sum(n)) %>% 
+    filter(Description == 'Rural < 2.5k*') %>% 
+    arrange(desc(freq))
 
-bind_rows(
-codes %>% 
-    filter(State == 'MO') %>% 
-    group_by(Description) %>% 
-    count() %>% 
-    ungroup() %>% 
-mutate(freq = (n/sum(n))*1000,
-           st.deviation  = sd(freq),
-           sd_low = (st.deviation-freq)/1000,
-           sd_high = (st.deviation+freq)/1000,
-           Percent = freq/1000,
-       MO = 'Missouri') %>% 
-    select(MO,Description,sd_low,sd_high) %>% 
-    group_by(MO,Description) %>% 
-    summarise(sd_low = mean(sd_low),
-              sd_high = mean(sd_high)),
-codes %>% 
-    filter(State != 'MO') %>% 
-    group_by(Description) %>% 
-    count() %>% 
-    ungroup() %>% 
-mutate(freq = (n/sum(n))*1000,
-           st.deviation  = sd(freq),
-           sd_low = (st.deviation-freq)/1000,
-           sd_high = (st.deviation+freq)/1000,
-           Percent = freq/1000,
-       MO = 'Rest of U.S.') %>% 
-    select(MO,Description,sd_low,sd_high) %>% 
-    group_by(MO,Description) %>% 
-    summarise(sd_low = mean(sd_low),
-              sd_high = mean(sd_high))
-) %>% 
-    left_join(.,code_percent)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

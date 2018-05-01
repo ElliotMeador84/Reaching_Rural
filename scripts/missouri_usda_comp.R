@@ -4,6 +4,7 @@ library(tidyverse)
 library(RColorBrewer)
 library(readxl)
 library(scales)
+
 load('data/code_percent.RData')
 load('data/codes.RData')
 
@@ -58,7 +59,9 @@ glimpse(codes)
 # Description plots -------------------------------------------------------
 
 colors <- RColorBrewer::brewer.pal(9, 'Blues')[c(4, 7)]
+
 #####
+# q <- 
 codes %>% # interesting plot, not sure what to do with it
     mutate(Population_2010 = Population_2010) %>% 
     select(MO, Population_2010, Description) %>%
@@ -77,14 +80,32 @@ codes %>% # interesting plot, not sure what to do with it
         strip.background = element_blank(),
         panel.border = element_blank()
     ) +
+    facet_wrap( ~ Description,scales = 'free')+
     labs(
         title = 'Comparing U.S. and Missouri',
         x = 'Population transformed\nusing natural log',
         y = 'Proportion',
         caption = '*Not adjacent to\nan urban county'
-    ) +
-    facet_wrap( ~ Description,scales = 'free')
+    ) 
 
+
+
+data_frame(x = 6:12) %>% 
+    mutate(y = exp(x)) %>% 
+    ggplot(aes(x,y,group = 1))+
+    geom_point(color = colors[2],fill = colors[2])+
+    geom_line(color = colors[2])+
+    theme_bw() +
+    scale_x_continuous(breaks = seq(6,16,1))+
+    scale_y_continuous(labels = scales::comma_format())+
+    theme(axis.line = element_line(color = 'black'),
+        legend.position = 'bottom',
+        panel.grid  = element_blank(),
+        strip.background = element_blank(),
+        panel.border = element_blank()
+    ) +
+    labs(y = 'Population',
+         x = 'Log (population)')
 # bar_plots ---------------------------------------------------------
 code_percent <- codes %>%
     select(MO, Population_2010, Description) %>%
@@ -105,6 +126,39 @@ a <- bind_cols(
 code_percent$order <- as.numeric(c(a, a))
 code_percent$MO <- fct_relevel(code_percent$MO,
                                c('Rest of U.S.', 'Missouri'))
+
+
+
+
+# Code percent long -------------------------------------------------------
+
+code_percent_MO <- code_percent[1:9,]
+code_percent_US <- code_percent[10:18,]
+
+
+code_percent_long <- bind_cols(code_percent_US,
+
+code_percent_MO %>% 
+    ungroup() %>% 
+   select(n_MO = n,
+          Percent_MO = Percent)
+)
+
+
+code_percent_wide <- code_percent_long %>%
+    mutate(Percent_diff = abs(Percent - Percent_MO)) %>% 
+    arrange(Percent_diff) %>% 
+    mutate(rank = 1:nrow(.))
+    
+    
+save(code_percent_wide,file = 'html/code_percent_wide.RData')
+
+
+
+
+
+
+
 # plot --------------------------------------------------------------
 code_percent$MO <- fct_relevel(code_percent$MO,'Rest of U.S.',after = 1)
 
@@ -227,7 +281,6 @@ mutate(freq = (n/sum(n))*1000,
               sd_high = mean(sd_high))
 ) %>% 
     left_join(.,code_percent)
-
 
 
 

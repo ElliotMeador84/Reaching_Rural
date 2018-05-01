@@ -4,13 +4,59 @@ author: "Elliot Meador"
 date: "30 April 2018"
 output: html_document
 ---
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,echo=F,message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+getwd()
 ```
 
-```{r}
+```{r, echo=F,message=FALSE}
 load('code_percent.RData')
+load('codes.RData')
+load('code_percent_wide.RData')
 source('bar_plot.R')
+source('density_plot.R')
+```
+## Place between line 278 and 279
+### Comparing Missouri and the rest of the U.S.
+
+The bar plot presented in Figure X.x shows the percentage of counties in the U.S. and Missouri as categorised by the USDA Rural - Urban Classification mentioned above. Figure X.x allows direct comparisons to be made between the U.S. (excluding Missouri) and Missouri in terms of proportion of counties and their categorisation. The groups are ordered by the average proportion of both groups. 
+
+```{r, echo=F,message=FALSE}
 bar_plot
+```
+
+We can see in Figure X.x that Missouri has the same general distribution of categories as the U.S. Though Missouri is much closer to the U.S. in proportion of Rural areas that are less than 2.5 thousand and is most different from the rest of the U.S. in the proportion of Metro areas sized between 250k and one million people. There are, in fact, three classifications that Missouri and the rest of the U.S. are almost exactly proportional: Rural < 2.5k, with a difference of 0.13%; Urban > 20k not adjacent to an urban county, with a difference of 0.65%; and, Metro > 1m, with a difference of 0.77%. 
+
+```{r,include=FALSE}
+code_percent_wide
+```
+Missouri has a higher proportion of counties that are classified as Rural < 2.5k that are not adjacent to an urban county, meaning these counties can only be adjacent to other rural counties. This suggests that Missouri has a higher proportion (about 6 percentage points) of rural counties that are more remote than the rest of the U.S. 
+
+```{r,include=FALSE}
+
+codes %>% 
+    group_by(State,Description) %>% 
+    count() %>% 
+    ungroup() %>% 
+    mutate(freq = n/sum(n)) %>% 
+    filter(Description == 'Rural < 2.5k*') %>% 
+    arrange(desc(freq))
+
+codes %>% 
+    group_by(State,Description) %>% 
+    count() %>% 
+    ungroup() %>% 
+    mutate(freq = n/sum(n)) %>% 
+    filter(Description == 'Rural < 2.5k*') %>% 
+    arrange(desc(freq))
+```
+
+Missouri is ranked 7th in the U.S. (out of 50 states) in terms of counties that are classified as Rural < 2.5k that are not adjacent to an urban county.
+
+## place after line 551
+###Appendix
+
+```{r, echo=F,message=FALSE}
+density_plot
 ```
 

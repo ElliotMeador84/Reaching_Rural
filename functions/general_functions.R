@@ -132,7 +132,14 @@ join.nrow <- function(x,y){
     return(i)
 }
 
-
+common_names <-
+    function(x, y) {
+        if(is.data.frame(x) == T & is.data.frame(y)){
+            Reduce(intersect, list(names(x), names(y)))
+        } else {
+            print('both arguments must be data.frames')
+        }
+    }
 
 
 

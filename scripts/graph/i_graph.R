@@ -4,6 +4,7 @@ library(tidyverse)
 library(visNetwork)
 source('scripts/data_import.R')
 
+
 # working file is bravo
 
 # Create Bipartite Graph --------------------------------------------------
@@ -39,6 +40,8 @@ V(g_nonproft)$city <- Nodes$city
 V(g_nonproft)$zip <- Nodes$zip
 
 # create VisNetwork Graphs ====
+getwd()
+
 
 df_org_vis <- toVisNetworkData(g_nonproft)
 

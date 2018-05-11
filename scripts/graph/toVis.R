@@ -8,9 +8,8 @@ source('functions/general_functions.R')
 source('scripts/graph/i_graph.R')
 load('data/zip_county_fips.RData')
 load('data/codes.RData')
-
-# file.edit('scripts/graph/i_graph.R')
-
+file.edit('scripts/graph/i_graph.R')
+load('data/zip_code_database.R')
 
 # Merge workingdata with nodes ---------------------------------------
 
@@ -20,30 +19,39 @@ load('data/codes.RData')
 
 
 # join attributes -----------------------------------------------------
-names(working.cd.data)
-names(zipcode)
 
-org_data_att <- working.cd.data %>%
-    distinct() %>%
-    select(org_name, zip = zip_code, TOT_REV_PRIOR,
-           CONTRIB_ALL,
-           city = CITY) %>%
-    mutate(zip = as.numeric(zip),
-           label = clean(org_name),
-           city = clean(city)) %>%
-    select(-org_name) %>%
-    distinct()
+visNetwork(df_org_vis$nodes,df_org_vis$edges)
 
-common_names(df_org_vis$nodes,org_data_att)
+#====
+# names(zip_code_database) <- clean(names(zip_code_database))
+# 
+# bravo <- bravo %>% 
+#     rename(zip = zip_code)
+
+# 
+# org_data_att <- left_join(bravo[-1],zip_code_database)
+# org_data_att <- distinct(org_data_att)
+
+
+#=====
+
+
+
+org_data_att_clean <- org_data_att %>% 
+    mutate_if(is.character,clean) %>% 
+    select(zip,county,latitude,longitude)
+
+
+#====
 
 df_org_vis$nodes <- df_org_vis$nodes %>% 
-    mutate(city = clean(city))
+    mutate_if(is.character,clean)
 
-nodes <- left_join(df_org_vis$nodes,org_data_att)
+nodes <- left_join(df_org_vis$nodes,org_data_att_clean) %>% distinct()
 
 edges <- df_org_vis$edges
 
-# break --------------------------------------------------------------
+# get clean description vary --------------------------------------------------------------
 
 alfa <- zip_county_fips %>%
     rename(County_Name = COUNTYNAME) %>%
@@ -52,65 +60,104 @@ alfa <- zip_county_fips %>%
 
 foxtrot <- codes %>%
     filter(State == 'MO') %>% 
-    mutate(County_Name = clean(County_Name))
-
-codes_zip <- left_join(foxtrot, alfa)
-
-
-# break --------------------------------------------------------------
+    mutate(county = clean(County_Name)) %>% 
+    select(-County_Name) %>% 
+    set_names(clean(names(.)))
 
 
-tango <- codes_zip %>%
-    select(zip = ZIP,
-           Description)
+nodes <- left_join(nodes,foxtrot) 
 
-zip_double <- tango %>% 
-    distinct() %>% 
-    group_by(zip) %>% 
-    count() %>% 
-    filter(n >1) %>% 
-    pull(zip)    
-  
-
-tango %>% 
-    filter(zip %in% zip_double) %>% 
-    group_by(zip,Description) %>% 
-    count()
-    
-    
-# breaks -------------------------------------------------------------
-common_names(tango,nodes)
-names(nodes)
-whisky <- left_join(
-    distinct(nodes),
-    distinct(tango)
-) 
-
-# break --------------------------------------------------------------
-names(whisky)
-
-id_double <- whisky %>% 
-    group_by(id) %>% 
-    count() %>% 
-    filter(n >1) %>% 
-    pull(id)
-
-whisky %>% 
-    filter(id %in% id_double) %>% 
-    group_by(zip) %>% 
-    count(Description) %>% 
-    arrange(desc(n))
-    
-    
-    
-    
-    
     
 
-# break ---------------------------------------------------------------
+# merge attributes to 'nodes' ---------------------------------------------
+
+
+#====== colors
+
+
+color_df <- tibble(Description = c(
+    'Metro > 1m',
+    'Metro 250k - 1m',
+    'Metro < 250k',
+    'Urban > 20k',
+    'Urban > 20k*',
+    'Urban 2.5k - 19.9k',
+    'Urban 2.5k - 19.9k*',
+    'Rural < 2.5k',
+    'Rural < 2.5k*')) %>% 
+    mutate(color = RColorBrewer::brewer.pal(9,'Blues'))%>% 
+    set_names(clean(names(.)))
 
 
 
+nodes <- left_join(nodes,color_df) %>% 
+    as_tibble()
+
+# size
+
+
+size_df <- tibble(id = V(g_nonproft)$name,
+       degree = degree(g_nonproft))
+
+nodes <- left_join(nodes,size_df) %>% as_tibble()
+
+
+# size rescale -------
+
+
+nodes$size <- rescale(nodes$degree,30,100)
+
+# Plot ---------------
+
+# think about plotting 
+# using only three colors
+# the 9 colors does not show up well,
+# maybe white, grey and black.
 
 visNetwork(edges = edges, nodes = nodes) %>%
+    visNodes(physics = T) %>% 
     visInteraction(navigationButtons = TRUE)
+    
+    
+    
+
+# Table 2 Network characterstics  ====
+
+nodes %>% 
+    mutate(degree_bin = ifelse(.$degree >0,1,0)) %>% 
+    group_by(description) %>% 
+    summarise('Total organisations' = n(),
+              'Proportion with at least one tie' = scales::percent(mean(degree_bin)),
+              'Average degree' = round(mean(degree),1))
+    
+
+# lat_long plot -----------------------------------------------------------
+
+
+nodes %>% 
+    unite('lat_long',c('latitude','longitude'),remove = F) %>% 
+    group_by(lat_long) %>% 
+    mutate(total = n()) %>% 
+    ggplot(aes(longitude,latitude))+
+    geom_point(aes(size = total,color = description),show.legend = T,alpha = .8)+
+    coord_map()+
+    theme_void()
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+
+
+
+
+
+
+

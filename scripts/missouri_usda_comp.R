@@ -191,7 +191,7 @@ comparing_US_and_Missouri_bar <- code_percent %>%
         y = 'Percent of total counties',
         caption = '*Not adjacent to\nan urban county'
     )
-ggsave('png/comparing_US_and_Missouri_bar.png',width = 5,height = 7)
+# ggsave('png/comparing_US_and_Missouri_bar.png',width = 5,height = 7)
 # Tables ------------------------------------------------------------------
 MO_proportions <- codes %>% 
     group_by(State) %>% 

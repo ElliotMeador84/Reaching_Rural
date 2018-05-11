@@ -3,6 +3,9 @@ library(RColorBrewer)
 
 
 # Bar_plot --------------------------------------------------------------
+
+
+
 colors <- RColorBrewer::brewer.pal(9, 'Blues')[c(4, 7)]
 
 bar_plot <- code_percent %>%
@@ -23,7 +26,9 @@ bar_plot <- code_percent %>%
         panel.grid  = element_blank(),
         strip.background = element_blank(),
         panel.border = element_blank(),
-        plot.title = element_text(hjust = 0)
+        plot.title = element_text(hjust = 0),
+        axis.line = element_line(color = 'black'),
+        text = element_text(family = 'TT Arial')
     ) +
     labs(
         x = 'USDA Rural - Urban\nClassification',
@@ -31,6 +36,5 @@ bar_plot <- code_percent %>%
         caption = '*Not adjacent to\nan urban county'
     )
 bar_plot
-
-
+# ggsave('png/bar_plot.png',width = 7,height = 7)
 

@@ -2,7 +2,9 @@
 title: "Reacing_rural_revisions"
 author: "Elliot Meador"
 date: "30 April 2018"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 ```{r setup, include=FALSE,echo=F,message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -21,7 +23,7 @@ source('density_plot.R')
 
 The bar plot presented in Figure X.x shows the percentage of counties in the U.S. and Missouri as categorised by the USDA Rural - Urban Classification mentioned above. Figure X.x allows direct comparisons to be made between the U.S. (excluding Missouri) and Missouri in terms of proportion of counties and their categorisation. The groups are ordered by the average proportion of both groups. 
 
-```{r, echo=F,message=FALSE}
+```{r, echo=F,message=FALSE,fig.height=6,}
 bar_plot
 ```
 

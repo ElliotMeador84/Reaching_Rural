@@ -3,12 +3,13 @@
 library(tidyverse)
 library(zipcode)
 library(visNetwork)
+library(sjPlot)
 source('functions/dplyr_helpers.R')
 source('functions/general_functions.R')
 source('scripts/graph/i_graph.R')
 load('data/zip_county_fips.RData')
 load('data/codes.RData')
-file.edit('scripts/graph/i_graph.R')
+# file.edit('scripts/graph/i_graph.R')
 load('data/zip_code_database.R')
 
 # Merge workingdata with nodes ---------------------------------------
@@ -107,6 +108,10 @@ nodes <- left_join(nodes,size_df) %>% as_tibble()
 
 nodes$size <- rescale(nodes$degree,30,100)
 
+# add cliques -------------------------------------------------------------
+file.edit('scripts/cliques.R')
+source('scripts/cliques.R')
+
 # Plot ---------------
 
 # think about plotting 
@@ -117,19 +122,45 @@ nodes$size <- rescale(nodes$degree,30,100)
 visNetwork(edges = edges, nodes = nodes) %>%
     visNodes(physics = T) %>% 
     visInteraction(navigationButtons = TRUE)
-    
-    
-    
 
 # Table 2 Network characterstics  ====
+nodes$description <- factor(nodes$description,
+levels = c('Metro > 1m',
+'Metro 250k - 1m',
+'Metro < 250k',
+'Urban > 20k',
+'Urban > 20k*',
+'Urban 2.5k - 19.9k',
+'Urban 2.5k - 19.9k*',
+'Rural < 2.5k',
+'Rural < 2.5k*'))
+# ====
 
-nodes %>% 
+Table_2 <- nodes %>% 
     mutate(degree_bin = ifelse(.$degree >0,1,0)) %>% 
     group_by(description) %>% 
     summarise('Total organisations' = n(),
               'Proportion with at least one tie' = scales::percent(mean(degree_bin)),
-              'Average degree' = round(mean(degree),1))
+              'Average degree' = round(mean(degree),1),
+              'Average clique size' = mean(max)) 
     
+# write_csv(Table_2,'data/Table_2.csv')    
+# 
+# clique for major groups ==== 
+
+rural_clique <- mean(c(0.4,0.57))
+urban_clique <- mean(c(0.67,0.81,0.40))
+metro_clique <- mean(c(0.63,0.54,0.57))
+
+nodes %>% 
+    mutate(bin = ifelse(max > 0,1,0)) %>% 
+    select(description,bin) %>% 
+    group_by(description) %>% 
+    summarise(Average = mean(bin)) %>% 
+    mutate(aggregate = c(rep('Metro',3),rep('Urban',4),rep('Rural',2))) %>% 
+    ungroup() %>% 
+    group_by(aggregate) %>% 
+    mutate(`Average by aggregate` = scales::percent(mean(Average)))
 
 # lat_long plot -----------------------------------------------------------
 

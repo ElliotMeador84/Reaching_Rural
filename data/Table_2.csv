@@ -1,0 +1,10 @@
+description,Total organisations,Proportion with at least one tie,Average degree,Average clique size
+Metro > 1m,283,40.6%,0.9,0.568904593639576
+Metro 250k - 1m,26,34.6%,0.8,0.5384615384615384
+Metro < 250k,83,45.8%,1,0.6265060240963856
+Urban > 20k,20,55%,0.9,0.65
+Urban > 20k*,10,40%,0.6,0.4
+Urban 2.5k - 19.9k,37,48.6%,1.7,0.8108108108108109
+Urban 2.5k - 19.9k*,21,42.9%,1.2,0.6666666666666666
+Rural < 2.5k,5,40%,0.8,0.4
+Rural < 2.5k*,14,50%,0.6,0.5714285714285714
